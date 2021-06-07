@@ -187,7 +187,6 @@ else
 
 	ARCH=$(uname -m)
 	VER=$(lsb_release -rs)
-	#tag="v9.0.3" 		# replace tag by the number of release you want
 	release=$(lsb_release -ds)
 	mkdir -p /DNIF
 	echo -e "\nDNIF Installer for $tag\n"&>> /DNIF/install.log
@@ -205,17 +204,6 @@ else
 		echo -e "[-] Checking operating system for compatibility - ... \e[1;32m[DONE] \e[0m\n"&>> /DNIF/install.log
 		echo -e "** Please report issues to https://github.com/dnif/installer/issues"&>> /DNIF/install.log
 		echo -e "** for more information visit https://docs.dnif.it/v9/docs/high-level-dnif-architecture\n&>> /DNIF/install.log"
-		#echo -e "* Select a DNIF component you would like to install"
-		#echo -e "    [1] Core (CO)"
-		#echo -e "    [2] Console (LC)"
-		#echo -e "    [3] Datanode (DN)"
-		#	echo -e "    [4] Adapter (AD)\n"
-		#COMP=""
-		#while [[ ! $COMP =~ ^[1-4] ]]; do
-		#	echo -e "Pick the number corresponding to the component (1 - 4):  \c"
-		#	read -r COMP
-		#	done
-		#echo -e "-----------------------------------------------------------------------------------------"
 		case $1 in
 			1)
 				echo -e "[-] Installing the CORE \n"&>> /DNIF/install.log
@@ -284,8 +272,6 @@ services:
 				sleep 5
 				docker_check
 				compose_check
-				#sysctl_check
-				#ufw -f reset&>> /DNIF/install.log
 				echo -e "[-] Pulling docker Image for Console\n"&>> /DNIF/install.log
 				docker pull dnif/console:$tag&>> /DNIF/install.log
 				cd /
@@ -362,11 +348,6 @@ services:
 				ufw -f reset&>> /DNIF/install.log
 				echo -e "[-] Pulling docker Image for Adapter\n"&>> /DNIF/install.log
 				docker pull dnif/adapter:$tag&>> /DNIF/install.log
-				#COREIP=""
-				#while [[ ! $COREIP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; do
-				#	echo -e "ENTER CORE IP: \c"
-				#	read -r COREIP
-				#done
 				cd /
 				sudo mkdir -p /DNIF
 				sudo mkdir -p /DNIF/AD
@@ -412,8 +393,6 @@ else
 
 	ARCH=$(uname -m)
 	VER=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
-	#VER=$(lsb_release -rs)
-	#tag="v9.0.3" 		# replace tag by the number of release you want
 	release="$(. /etc/os-release && echo "$PRETTY_NAME")"
 
 	mkdir -p /DNIF
@@ -432,17 +411,6 @@ else
 		echo -e "[-] Checking operating system for compatibility - ... \e[1;32m[DONE] \e[0m\n"&>> /DNIF/install.log
 		echo -e "** Please report issues to https://github.com/dnif/installer/issues"&>> /DNIF/install.log
 		echo -e "** for more information visit https://docs.dnif.it/v9/docs/high-level-dnif-architecture\n"&>> /DNIF/install.log
-		#echo -e "* Select a DNIF component you would like to install"
-		#echo -e "    [1] Core (CO)"
-		#echo -e "    [2] Console (LC)"
-		#echo -e "    [3] Datanode (DN)"
-		#echo -e "    [4] Adapter (AD)\n"
-		#COMP=""
-		#while [[ ! $COMP =~ ^[1-4] ]]; do
-		#	echo -e "Pick the number corresponding to the component (1 - 4):  \c"
-		#			read -r COMP
-		#	done
-		#echo -e "-----------------------------------------------------------------------------------------"
 		case "$1" in
 			1)
 				echo -e "[-] Installing the CORE \n"&>> /DNIF/install.log
@@ -459,18 +427,11 @@ else
         				echo -e "[-] Found java executable in $JAVA_HOME \n"&>> /DNIF/install.log
         				_java="$JAVA_HOME/bin/java"
 				else
-        				#default="Y"
-        				#echo -e "[-] To proceed further you have to install openjdk14 before installation\n"
-        				#read -p "[-] To install OpenJdk14 type [Y/n] " var
-        				#read -r var
-        				#input=${var:-$default}
-        				#temp=${input^^}
-        				#if [ "$temp" == "Y" ]; then
 					cd /usr/lib
 					file="/usr/bin/wget"
 					if [ ! -f "$file " ]; then
-					dnf install -y wget&>> /DNIF/install.log
-					dnf install -y zip&>> /DNIF/install.log
+						dnf install -y wget&>> /DNIF/install.log
+						dnf install -y zip&>> /DNIF/install.log
 					fi
 					wget https://download.java.net/java/GA/jdk14/076bab302c7b4508975440c56f6cc26a/36/GPL/openjdk-14_linux-x64_bin.tar.gz&>> /DNIF/install.log
 					tar -xvf openjdk-14_linux-x64_bin.tar.gz&>> /DNIF/install.log
@@ -481,12 +442,6 @@ else
 					mkdir -p /usr/lib/jvm/&>> /DNIF/install.log
 					mkdir -p /usr/lib/jvm/java-14-openjdk-amd64&>> /DNIF/install.log
 					cp -r /usr/lib/jdk-14/* /usr/lib/jvm/java-14-openjdk-amd64/&>> /DNIF/install.log
-
-
-        				#else
-                			#	echo "[-] Aborted"
-                			#	exit 0
-        				#fi
 				fi
 				if [[ "$_java" ]]; then
         				version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
@@ -499,13 +454,7 @@ else
 				mkdir -p /DNIF/common&>> /DNIF/install.log
 				mkdir -p /DNIF/backup/core&>> /DNIF/install.log
 				echo -e "\n[-] Pulling docker Image for CORE\n"&>> /DNIF/install.log
-				sudo podman pull docker-daemon:docker.io/dnif/core:$tag&>> /DNIF/install.log
-
-				#COREIP=""
-				#while [[ ! $COREIP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; do
-				#	echo -e "ENTER CORE IP: \c"
-				#	read -r COREIP
-				#done
+				sudo podman pull dnif/core:$tag&>> /DNIF/install.log
 
 				sudo echo -e "version: "\'2.0\'"
 services:
@@ -534,7 +483,7 @@ services:
     				mkdir -p /DNIF/DL&>> /DNIF/install.log
 				mkdir -p /DNIF/backup/dn&>> /DNIF/install.log
 				echo -e "[-] Pulling docker Image for Datanode\n"&>> /DNIF/install.log
-				sudo podman pull docker-daemon:docker.io/dnif/datanode:$tag&>> /DNIF/install.log
+				sudo podman pull dnif/datanode:$tag&>> /DNIF/install.log
 
 				echo -e "version: "\'2.0\'"
 services:
@@ -578,7 +527,7 @@ services:
 
 				mkdir -p /DNIF/LC
 				echo -e "[-] Pulling docker Image for Console\n"&>> /DNIF/install.log
-				sudo podman pull docker-daemon:docker.io/dnif/console:$tag&>> /DNIF/install.log
+				sudo podman pull dnif/console:$tag&>> /DNIF/install.log
 
 				sudo echo -e "version: "\'2.0\'"
 services:
@@ -613,13 +562,6 @@ services:
                                         echo -e "[-] Found java executable in $JAVA_HOME \n"&>> /DNIF/install.log
                                         _java="$JAVA_HOME/bin/java"
                                 else
-                                        #default="Y"
-                                        #echo -e "[-] To proceed further you have to install openjdk14 before installation\n"
-                                        #read -p "[-] To install OpenJdk14 type [Y/n] " var
-                                        #read -r var
-                                        #input=${var:-$default}
-                                        #temp=${input^^}
-                                        #if [ "$temp" == "Y" ]; then
 					cd /usr/lib
 					file="/usr/bin/wget"
                                         if [ ! -f "$file " ]; then
@@ -635,12 +577,6 @@ services:
                                         mkdir -p /usr/lib/jvm/&>> /DNIF/install.log
                                         mkdir -p /usr/lib/jvm/java-14-openjdk-amd64&>> /DNIF/install.log
                                         cp -r /usr/lib/jdk-14/* /usr/lib/jvm/java-14-openjdk-amd64/&>> /DNIF/install.log
-
-
-                                        #else
-                                        #        echo "[-] Aborted"
-                                        #       exit 0
-                                        #fi
                                 fi
                                 if [[ "$_java" ]]; then
                                         version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
@@ -653,15 +589,7 @@ services:
 				mkdir -p /DNIF/common&>> /DNIF/install.log
 				mkdir -p /DNIF/backup/dn&>> /DNIF/install.log
 				echo -e "[-] Pulling docker Image for Datanode\n"&>> /DNIF/install.log
-				sudo podman pull docker-daemon:docker.io/dnif/datanode:$tag&>> /DNIF/install.log
-
-
-
-				#COREIP=""
-				#while [[ ! $COREIP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; do
-				#	echo -e "ENTER CORE IP: \c"
-				#	read -r COREIP
-				#done
+				sudo podman pull dnif/datanode:$tag&>> /DNIF/install.log
 
 				echo -e "version: "\'2.0\'"
 services:
@@ -701,13 +629,7 @@ services:
 				mkdir -p /DNIF/AD&>> /DNIF/install.log
 				mkdir -p /DNIF/backup/ad&>> /DNIF/install.log
 				echo -e "[-] Pulling docker Image for Adapter\n"&>> /DNIF/install.log
-				sudo podman pull docker-daemon:docker.io/dnif/adapter:$tag&>> /DNIF/install.log
-
-				#COREIP=""
-				#while [[ ! $COREIP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; do
-				#	echo -e "ENTER CORE IP: \c"
-				#	read -r COREIP
-				#done
+				sudo podman pull dnif/adapter:$tag&>> /DNIF/install.log
 
 				sudo echo -e "version: "\'2.0\'"
 services:
