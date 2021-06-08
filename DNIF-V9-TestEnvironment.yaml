@@ -423,7 +423,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "10000"
           ToPort: "10000"
@@ -435,12 +435,12 @@ Resources:
         - IpProtocol: tcp
           FromPort: "0"
           ToPort: "65535"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
@@ -468,7 +468,7 @@ Resources:
             Encrypted: "true"
       Tags:
         - Key: Name
-          Value: DNIF-CORE
+          Value: DNIF-V9-CORE
 
       UserData:
         Fn::Base64: |
