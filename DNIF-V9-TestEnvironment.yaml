@@ -262,6 +262,21 @@ Parameters:
     Type: String
     Default: DNIF-CloudFormationTest
     Description: The key used to access the instance.
+  OrganisationName:
+    Type: String
+    Default: DNIF
+  UserName:
+    Type: String
+    Default: Jatin.Bajaj@dnif.it
+  MailId:
+    Type: String
+    Default: Jatin.Bajaj@dnif.it
+  ClusterName:
+    Type: String
+    Default: DNIF-CloudFormationTest
+  Password:
+    Type: String
+    Default: Jatin@123
 
 Resources:
   DNIFVPC:
@@ -423,7 +438,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "10000"
           ToPort: "10000"
@@ -435,12 +450,12 @@ Resources:
         - IpProtocol: tcp
           FromPort: "0"
           ToPort: "65535"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
@@ -474,64 +489,12 @@ Resources:
         Fn::Base64: |
           #!/bin/bash
           cd /var/tmp
-          IP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
-          sudo bash /var/tmp/install.sh 1  $IP
-          sudo bash /var/tmp/install.sh 2
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/credentials.py
+          pip3 install sys 
+          python3 credentials.py !Ref OrganisationName !Ref UserName !Ref MailId !Ref ClusterName !Ref Password
     Metadata:
       "AWS::CloudFormation::Designer":
         id: a8ac6129-f1bf-408b-bbac-5adfe3ec3ce2
-  DataNode:
-    Type: "AWS::EC2::Instance"
-    Properties:
-      ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.2xlarge
-      SubnetId: !Ref VPCPublicSubnet
-      KeyName: !Ref Key
-      SecurityGroupIds:
-        - !Ref PrivateHostSecurityGroup
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            VolumeSize: 1000
-      Tags:
-        - Key: Name
-          Value: DNIF-V9-DataNode
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
-          sudo bash /var/tmp/install.sh 3  '${CORE.PrivateIp}'
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: b5c8836e-c9f5-4f34-a846-013469e77432
-  Adapter:
-    Type: "AWS::EC2::Instance"
-    Properties:
-      ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.2xlarge
-      SubnetId: !Ref VPCPublicSubnet
-      KeyName: !Ref Key
-      SecurityGroupIds:
-        - !Ref PrivateHostSecurityGroup
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            VolumeSize: 350
-
-      Tags:
-        - Key: Name
-          Value: DNIF-V9-Adapter
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
-          sudo bash /var/tmp/install.sh 4  '${CORE.PrivateIp}'
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: f1dce7ea-fd08-48c3-8bdb-b4514c05751e
 
 Outputs:
   COREPublicIp:
@@ -540,9 +503,3 @@ Outputs:
   COREPrivateIp:
     Description: Server Private IP
     Value: !GetAtt CORE.PrivateIp
-  DataNodePublicIp:
-    Description: Server Public IP
-    Value: !GetAtt DataNode.PublicIp
-  AdapterPublicIp:
-    Description: Server Public IP
-    Value: !GetAtt Adapter.PublicIp
