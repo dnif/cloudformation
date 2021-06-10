@@ -262,21 +262,27 @@ Parameters:
     Type: String
     Default: DNIF-CloudFormationTest
     Description: The key used to access the instance.
-  OrganisationName:
+  Name:
     Type: String
-    Default: DNIF
+    Default: Jatin Bajaj
   UserName:
     Type: String
-    Default: Jatin.Bajaj@dnif.it
+    Default: jatin.bajaj@dnif.it
   MailId:
     Type: String
     Default: Jatin.Bajaj@dnif.it
+  OrganisationName:
+    Type: String
+    Default: DNIF
   ClusterName:
     Type: String
     Default: DNIF-CloudFormationTest
   Password:
     Type: String
     Default: Jatin@123
+  LicenseKey:
+    Type: String
+    Default: ABC12DE
 
 Resources:
   DNIFVPC:
@@ -469,7 +475,7 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.2xlarge
+      InstanceType: c5.4xlarge
       SubnetId: !Ref VPCPublicSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
@@ -483,23 +489,92 @@ Resources:
             Encrypted: "true"
       Tags:
         - Key: Name
-          Value: DNIF-CORE
+          Value: DNIF-V9-CORE
 
       UserData:
-        Fn::Base64: |
-          #!/bin/bash
-          cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/credentials.py
-          pip3 install sys 
-          python3 credentials.py !Ref OrganisationName !Ref UserName !Ref MailId !Ref ClusterName !Ref Password
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+           cd /var/tmp
+          IP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          sudo bash /var/tmp/install.sh 1  $IP
+          sudo bash /var/tmp/install.sh 2
+
     Metadata:
       "AWS::CloudFormation::Designer":
         id: a8ac6129-f1bf-408b-bbac-5adfe3ec3ce2
 
+  DataNode:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: ami-0012ffabeb7413479
+      InstanceType: c5.4xlarge
+      SubnetId: !Ref VPCPublicSubnet
+      KeyName: !Ref Key
+      SecurityGroupIds:
+        - !Ref PrivateHostSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 1000
+      Tags:
+        - Key: Name
+          Value: DNIF-V9-DataNode
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          cd /var/tmp
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          sudo bash /var/tmp/install.sh 3  '${CORE.PrivateIp}'
+
+  Adapter:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: ami-0012ffabeb7413479
+      InstanceType: c5.4xlarge
+      SubnetId: !Ref VPCPublicSubnet
+      KeyName: !Ref Key
+      SecurityGroupIds:
+        - !Ref PrivateHostSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 350
+
+      Tags:
+        - Key: Name
+          Value: DNIF-V9-Adapter
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          cd /var/tmp
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          sudo bash /var/tmp/install.sh 4  '${CORE.PrivateIp}'
+          echo "OrganisationName=${OrganisationName}">>/var/tmp/credentials.txt
+          echo "UserName=${UserName}">>/var/tmp/credentials.txt
+          echo "MailId=${MailId}">>/var/tmp/credentials.txt
+          echo "ClusterName=${ClusterName}">>/var/tmp/credentials.txt
+          echo "Password=${Password}">>/var/tmp/credentials.txt
+          echo "licenseKey=${LicenseKey}">>/var/tmp/credentials.txt
+          echo "PrivateIp=${CORE.PrivateIp}">>/var/tmp/credentials.txt
+          echo "PublicIP=${CORE.PublicIp}">>/var/tmp/credentials.txt
+          echo "Name=${Name}">>/var/tmp/credentials.txt
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/requirements.txt
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/run.sh
+          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/test_first_time_ui_calls.py
+          apt-get -y install python3-venv
+          bash run.sh
+
+    Metadata:
+      "AWS::CloudFormation::Designer":
+        id: f1dce7ea-fd08-48c3-8bdb-b4514c05751e
 Outputs:
   COREPublicIp:
     Description: Server Public IP
     Value: !GetAtt CORE.PublicIp
-  COREPrivateIp:
-    Description: Server Private IP
-    Value: !GetAtt CORE.PrivateIp
+  AdapterPublicIp:
+    Description: Server Public IP
+    Value: !GetAtt Adapter.PublicIp
+  DataNodePublicIp:
+    Description: Server Public IP
+    Value: !GetAtt DataNode.PublicIp

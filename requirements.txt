@@ -1,0 +1,6 @@
+pytest
+virtualenv
+fabric
+fabric2
+netifaces
+requests
