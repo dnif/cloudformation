@@ -559,9 +559,9 @@ Resources:
           echo "PrivateIp=${CORE.PrivateIp}">>/var/tmp/credentials.txt
           echo "PublicIP=${CORE.PublicIp}">>/var/tmp/credentials.txt
           echo "Name=${Name}">>/var/tmp/credentials.txt
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/requirements.txt
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/run.sh
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/test_first_time_ui_calls.py
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/requirements.txt
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/run.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/test_first_time_ui_calls.py
           apt-get -y install python3-venv
           bash run.sh
 
