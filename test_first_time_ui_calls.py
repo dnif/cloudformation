@@ -231,34 +231,35 @@ def test_mgmt_scope_list_two():
 #     assert res['status'] == 'success'
 
 
- def test_mgmt_onboard_dn_components():
-     url = 'https://{}/mgmt/components/list'.format(ip)
-     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-     response = requests.get(url=url, verify=False, headers=headers1)
-     res = response.json()
-     print(res)
-     hostname=res['data'][1]['hostName']
-     localIp=res['data'][1]['localIPv4Address']
-     systemType=res['data'][1]['systemClassType']
-     systemName=res['data'][1]['systemName']
-     tempId=res['data'][1]['tempId']
+def test_mgmt_onboard_dn_components():
+    url = 'https://{}/mgmt/components/list'.format(ip)
+    headers1 = {"Content-Type": "application/json", "ssid": s_sid}
+    response = requests.get(url=url, verify=False, headers=headers1)
+    res = response.json()
+    print(res)
+    hostname=res['data'][1]['hostName']
+    localIp=res['data'][1]['localIPv4Address']
+    systemType=res['data'][1]['systemClassType']
+    systemName=res['data'][1]['systemName']
+    tempId=res['data'][1]['tempId']
+    assert res['status'] == 'success'
+    url = 'https://{}/mgmt/dn/system'.format(ip)
+    body = {
+        "systemName": systemName,
+        "systemClassType": systemType,
+        "localIPv4Address": localIp,
+        "hostName": hostname,
+        "is_master": False,
+        "tempId": tempId,
+        "ssid": s_sid,
+         }
 
-     assert res['status'] == 'success'
-     url = 'https://{}/mgmt/dn/system'.format(ip)
-     body = {
-         "hostName": "cicd-03",
-         "is_master": False,
-         "localIPv4Address": "10.139.216.178",
-         "ssid": s_sid,
-         "systemClassType": "dn",
-         "systemName": "dl-slave"}
-
-     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-     response = requests.put(url=url, verify=False,
-                             data=json.dumps(body), headers=headers1)
-     res = response.json()
-     print(res)
-     assert res['status'] == 'success'
+    headers1 = {"Content-Type": "application/json", "ssid": s_sid}
+    response = requests.put(url=url, verify=False,
+                            data=json.dumps(body), headers=headers1)
+    res = response.json()
+    print(res)
+    assert res['status'] == 'success'
 
 
 # def test_mgmt_components_five():
@@ -295,7 +296,6 @@ def test_mgmt_scope_list_two():
 #     res = response.json()
 #     print(res)
 #     assert res['status'] == 'success'
-
 
 def test_mgmt_components_list_three():
     url = 'https://{}/mgmt/components/list'.format(ip)
