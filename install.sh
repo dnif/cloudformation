@@ -281,7 +281,6 @@ services:
 
 			2)
 				echo -e "[-] Installing the Console \n"&>> /DNIF/install.log
-				sleep 5
 				docker_check
 				compose_check
 				#sysctl_check
@@ -312,7 +311,6 @@ services:
 			3)
 				echo -e "[-] Installing the Datanode\n"&>> /DNIF/install.log
 				docker_check
-				sleep 120
 				compose_check
 				sysctl_check
 				ufw -f reset&>> /DNIF/install.log
@@ -356,7 +354,7 @@ services:
 			4)
 				echo -e "[-] Installing the ADAPTER \n"&>> /DNIF/install.log
 				docker_check
-				sleep 120
+		                sleep 180
 				compose_check
 				sysctl_check
 				ufw -f reset&>> /DNIF/install.log

@@ -213,24 +213,6 @@ def test_mgmt_scope_list_two():
     assert res['status'] == 'success'
 
 
-# def test_mgmt_dn_system_master():
-#     url = 'https://{}/mgmt/dn/system'.format(ip)
-#     body = {
-#         "hostName": "cicd-02",
-#         "is_master": True,
-#         "localIPv4Address": "10.139.216.177",
-#         "ssid": s_sid,
-#         "systemClassType": "dn",
-#         "systemName": "dl-master"
-#     }
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.put(url=url, verify=False,
-#                             data=json.dumps(body), headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'
-
-
 def test_mgmt_onboard_dn_components():
     url = 'https://{}/mgmt/components/list'.format(ip)
     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
@@ -260,42 +242,6 @@ def test_mgmt_onboard_dn_components():
     res = response.json()
     print(res)
     assert res['status'] == 'success'
-
-
-# def test_mgmt_components_five():
-#     url = 'https://{}/mgmt/components/list'.format(ip)
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.get(url=url, verify=False, headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'
-
-
-# def test_mgmt_scope_list_six():
-#     url = 'https://{}/mgmt/scope/list'.format(ip)
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.get(url=url, verify=False, headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'
-
-
-# def test_mgmt_dn_system_slave_two():
-#     url = 'https://{}/mgmt/dn/system'.format(ip)
-
-#     body = {
-#         "hostName": "cicd-00",
-#         "is_master": False,
-#         "localIPv4Address": "10.139.216.180",
-#         "ssid": s_sid,
-#         "systemClassType": "dn",
-#         "systemName": "dl-slave-2"}
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.put(url=url, verify=False,
-#                             data=json.dumps(body), headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'
 
 def test_mgmt_components_list_three():
     url = 'https://{}/mgmt/components/list'.format(ip)
@@ -327,19 +273,4 @@ def test_mgmt_components_list_three():
     assert res['status'] == 'success'
 
 
-# def test_mgmt_components_list_four():
-#     url = 'https://{}/mgmt/components/list'.format(ip)
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.get(url=url, verify=False, headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'
 
-
-# def test_mgmt_components_list_five():
-#     url = 'https://{}/mgmt/components/list'.format(ip)
-#     headers1 = {"Content-Type": "application/json", "ssid": s_sid}
-#     response = requests.get(url=url, verify=False, headers=headers1)
-#     res = response.json()
-#     print(res)
-#     assert res['status'] == 'success'

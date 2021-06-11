@@ -444,7 +444,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: !Ref PrivateSubnetCIDR
+          CidrIp: !Ref PublicSubnetCIDR
         - IpProtocol: tcp
           FromPort: "10000"
           ToPort: "10000"
@@ -456,12 +456,20 @@ Resources:
         - IpProtocol: tcp
           FromPort: "0"
           ToPort: "65535"
-          CidrIp: !Ref PrivateSubnetCIDR
+          CidrIp: !Ref PublicSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: "8086"
+          ToPort: "8086"
+          CidrIp: 10.0.1.0/24
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: !Ref PrivateSubnetCIDR
+          CidrIp: !Ref PublicSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: "8086"
+          ToPort: "8086"
+          CidrIp: !Ref PublicSubnetCIDR
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
@@ -496,7 +504,7 @@ Resources:
           #!/bin/bash -xe
            cd /var/tmp
           IP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 1  $IP
           sudo bash /var/tmp/install.sh 2
 
@@ -524,7 +532,7 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 3  '${CORE.PrivateIp}'
 
   Adapter:
@@ -548,7 +556,7 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 4  '${CORE.PrivateIp}'
           echo "OrganisationName=${OrganisationName}">>/var/tmp/credentials.txt
           echo "UserName=${UserName}">>/var/tmp/credentials.txt
@@ -563,6 +571,7 @@ Resources:
           wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/run.sh
           wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/test_first_time_ui_calls.py
           apt-get -y install python3-venv
+          sleep 60
           bash run.sh
 
     Metadata:
