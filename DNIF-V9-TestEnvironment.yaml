@@ -243,21 +243,13 @@ Parameters:
     Default: 10.0.0.0/16
     Description: CIDR Block for the VPC
     Type: String
-  PublicSubnetCIDR:
+  PrivateSubnetCIDR:
     AllowedPattern: >-
       ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
     Default: 10.0.1.0/24
 
     Type: String
-  PrivateSubnetCIDR:
-    AllowedPattern: >-
-      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.10.0/24
-
-    Type: String
-
   Key:
     Type: String
     Default: DNIF-CloudFormationTest
@@ -270,7 +262,7 @@ Parameters:
     Default: jatin.bajaj@dnif.it
   MailId:
     Type: String
-    Default: Jatin.Bajaj@dnif.it
+    Default: jatin.bajaj@dnif.it
   OrganisationName:
     Type: String
     Default: DNIF
@@ -322,7 +314,7 @@ Resources:
         "Fn::GetAtt":
           - EIP
           - AllocationId
-      SubnetId: !Ref VPCPublicSubnet
+      SubnetId: !Ref VPCPrivateSubnet
       Tags:
         - Key: Name
           Value: Project DNIF-V9-NATGW
@@ -337,39 +329,24 @@ Resources:
     Metadata:
       "AWS::CloudFormation::Designer":
         id: ffb3ee14-aa19-46d3-a15f-faf5f1b3fcd8
-  VPCPublicSubnet:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      MapPublicIpOnLaunch: true
-      CidrBlock: !Ref PublicSubnetCIDR
-      AvailabilityZone:
-        "Fn::Select":
-          - 0
-          - "Fn::GetAZs": ""
-      Tags:
-        - Key: Name
-          Value: Project DNIF-V9-PublicSubnet
-      VpcId: !Ref DNIFVPC
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 432a0b2d-de32-4738-a6e2-e5aa9a4bc62e
   VPCPrivateSubnet:
     Type: "AWS::EC2::Subnet"
     Properties:
+      MapPublicIpOnLaunch: true
       CidrBlock: !Ref PrivateSubnetCIDR
       AvailabilityZone:
         "Fn::Select":
           - 0
           - "Fn::GetAZs": ""
-      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: Project DNIF-V9-PrivateSubnet
       VpcId: !Ref DNIFVPC
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: 3f85b946-6504-4c0a-b9d9-50665088d3f1
-  PublicRouteTable:
+        id: 432a0b2d-de32-4738-a6e2-e5aa9a4bc62e
+
+  PrivateRouteTable:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref DNIFVPC
@@ -379,42 +356,15 @@ Resources:
     Metadata:
       "AWS::CloudFormation::Designer":
         id: d7113505-64cd-4a9d-a3a6-c47d6aa2a8cc
-  PublicDefaultRoute:
-    Type: "AWS::EC2::Route"
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref IGW
-      RouteTableId: !Ref PublicRouteTable
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 5a7683d4-ad24-49e0-afa1-8fb542f4b47b
-  PublicRouteSubnetAssociation:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref VPCPublicSubnet
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 1395f6f7-53a2-4fc0-a2d9-5e5f99a4809c
-  PrivateRouteTable:
-    Type: "AWS::EC2::RouteTable"
-    Properties:
-      VpcId: !Ref DNIFVPC
-      Tags:
-        - Key: Name
-          Value: Project DNIF-V9-PrivateRouteTable
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 6c70922a-611d-4fe3-b12b-97646b098237
   PrivateDefaultRoute:
     Type: "AWS::EC2::Route"
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGW
+      GatewayId: !Ref IGW
       RouteTableId: !Ref PrivateRouteTable
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: 0653568f-a513-439c-924e-a4f2dbcc60c6
+        id: 5a7683d4-ad24-49e0-afa1-8fb542f4b47b
   PrivateRouteSubnetAssociation:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
@@ -422,7 +372,7 @@ Resources:
       SubnetId: !Ref VPCPrivateSubnet
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: d4aaade1-eb0d-42d4-837b-77bd7d4d0cf7
+        id: 1395f6f7-53a2-4fc0-a2d9-5e5f99a4809c
   PrivateHostSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -444,7 +394,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: !Ref PublicSubnetCIDR
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "10000"
           ToPort: "10000"
@@ -456,7 +406,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "0"
           ToPort: "65535"
-          CidrIp: !Ref PublicSubnetCIDR
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "8086"
           ToPort: "8086"
@@ -465,11 +415,11 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: !Ref PublicSubnetCIDR
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "8086"
           ToPort: "8086"
-          CidrIp: !Ref PublicSubnetCIDR
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
@@ -483,8 +433,8 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      InstanceType: c5.2xlarge
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -516,8 +466,8 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      InstanceType: c5.2xlarge
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -539,8 +489,8 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      InstanceType: c5.2xlarge
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -573,7 +523,6 @@ Resources:
           apt-get -y install python3-venv
           sleep 60
           bash run.sh
-
     Metadata:
       "AWS::CloudFormation::Designer":
         id: f1dce7ea-fd08-48c3-8bdb-b4514c05751e

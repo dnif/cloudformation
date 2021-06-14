@@ -243,25 +243,38 @@ Parameters:
     Default: 10.0.0.0/16
     Description: CIDR Block for the VPC
     Type: String
-  PublicSubnetCIDR:
+  PrivateSubnetCIDR:
     AllowedPattern: >-
       ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
     Default: 10.0.1.0/24
 
     Type: String
-  PrivateSubnetCIDR:
-    AllowedPattern: >-
-      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
-    ConstraintDescription: Must be a valid IP range in x.x.x.x/x notation
-    Default: 10.0.10.0/24
-
-    Type: String
-
   Key:
     Type: String
     Default: DNIF-CloudFormationTest
     Description: The key used to access the instance.
+  Name:
+    Type: String
+    Default: Jatin Bajaj
+  UserName:
+    Type: String
+    Default: jatin.bajaj@dnif.it
+  MailId:
+    Type: String
+    Default: jatin.bajaj@dnif.it
+  OrganisationName:
+    Type: String
+    Default: DNIF
+  ClusterName:
+    Type: String
+    Default: DNIF-CloudFormationTest
+  Password:
+    Type: String
+    Default: Jatin@123
+  LicenseKey:
+    Type: String
+    Default: ABC12DE
 
 Resources:
   DNIFVPC:
@@ -301,7 +314,7 @@ Resources:
         "Fn::GetAtt":
           - EIP
           - AllocationId
-      SubnetId: !Ref VPCPublicSubnet
+      SubnetId: !Ref VPCPrivateSubnet
       Tags:
         - Key: Name
           Value: Project DNIF-V9-NATGW
@@ -316,39 +329,24 @@ Resources:
     Metadata:
       "AWS::CloudFormation::Designer":
         id: ffb3ee14-aa19-46d3-a15f-faf5f1b3fcd8
-  VPCPublicSubnet:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      MapPublicIpOnLaunch: true
-      CidrBlock: !Ref PublicSubnetCIDR
-      AvailabilityZone:
-        "Fn::Select":
-          - 0
-          - "Fn::GetAZs": ""
-      Tags:
-        - Key: Name
-          Value: Project DNIF-V9-PublicSubnet
-      VpcId: !Ref DNIFVPC
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 432a0b2d-de32-4738-a6e2-e5aa9a4bc62e
   VPCPrivateSubnet:
     Type: "AWS::EC2::Subnet"
     Properties:
+      MapPublicIpOnLaunch: true
       CidrBlock: !Ref PrivateSubnetCIDR
       AvailabilityZone:
         "Fn::Select":
           - 0
           - "Fn::GetAZs": ""
-      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: Project DNIF-V9-PrivateSubnet
       VpcId: !Ref DNIFVPC
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: 3f85b946-6504-4c0a-b9d9-50665088d3f1
-  PublicRouteTable:
+        id: 432a0b2d-de32-4738-a6e2-e5aa9a4bc62e
+
+  PrivateRouteTable:
     Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref DNIFVPC
@@ -358,42 +356,15 @@ Resources:
     Metadata:
       "AWS::CloudFormation::Designer":
         id: d7113505-64cd-4a9d-a3a6-c47d6aa2a8cc
-  PublicDefaultRoute:
-    Type: "AWS::EC2::Route"
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref IGW
-      RouteTableId: !Ref PublicRouteTable
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 5a7683d4-ad24-49e0-afa1-8fb542f4b47b
-  PublicRouteSubnetAssociation:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref VPCPublicSubnet
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 1395f6f7-53a2-4fc0-a2d9-5e5f99a4809c
-  PrivateRouteTable:
-    Type: "AWS::EC2::RouteTable"
-    Properties:
-      VpcId: !Ref DNIFVPC
-      Tags:
-        - Key: Name
-          Value: Project DNIF-V9-PrivateRouteTable
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: 6c70922a-611d-4fe3-b12b-97646b098237
   PrivateDefaultRoute:
     Type: "AWS::EC2::Route"
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGW
+      GatewayId: !Ref IGW
       RouteTableId: !Ref PrivateRouteTable
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: 0653568f-a513-439c-924e-a4f2dbcc60c6
+        id: 5a7683d4-ad24-49e0-afa1-8fb542f4b47b
   PrivateRouteSubnetAssociation:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
@@ -401,7 +372,7 @@ Resources:
       SubnetId: !Ref VPCPrivateSubnet
     Metadata:
       "AWS::CloudFormation::Designer":
-        id: d4aaade1-eb0d-42d4-837b-77bd7d4d0cf7
+        id: 1395f6f7-53a2-4fc0-a2d9-5e5f99a4809c
   PrivateHostSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -423,7 +394,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: tcp
           FromPort: "10000"
           ToPort: "10000"
@@ -435,12 +406,20 @@ Resources:
         - IpProtocol: tcp
           FromPort: "0"
           ToPort: "65535"
+          CidrIp: !Ref PrivateSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: "8086"
+          ToPort: "8086"
           CidrIp: 10.0.1.0/24
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: "2379"
           ToPort: "2379"
-          CidrIp: 10.0.1.0/24
+          CidrIp: !Ref PrivateSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: "8086"
+          ToPort: "8086"
+          CidrIp: !Ref PrivateSubnetCIDR
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       Tags:
@@ -455,7 +434,7 @@ Resources:
     Properties:
       ImageId: ami-0012ffabeb7413479
       InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -468,25 +447,27 @@ Resources:
             Encrypted: "true"
       Tags:
         - Key: Name
-          Value: DNIF-CORE
+          Value: DNIF-V9-CORE
 
       UserData:
-        Fn::Base64: |
-          #!/bin/bash
-          cd /var/tmp
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+           cd /var/tmp
           IP=$(ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 1  $IP
           sudo bash /var/tmp/install.sh 2
+
     Metadata:
       "AWS::CloudFormation::Designer":
         id: a8ac6129-f1bf-408b-bbac-5adfe3ec3ce2
+
   DataNode:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
       InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -501,17 +482,15 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 3  '${CORE.PrivateIp}'
-    Metadata:
-      "AWS::CloudFormation::Designer":
-        id: b5c8836e-c9f5-4f34-a846-013469e77432
+
   Adapter:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
       InstanceType: c5.4xlarge
-      SubnetId: !Ref VPCPublicSubnet
+      SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
         - !Ref PrivateHostSecurityGroup
@@ -527,22 +506,33 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           cd /var/tmp
-          wget https://raw.githubusercontent.com/dnif/installer/cloudformation/install.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/install.sh
           sudo bash /var/tmp/install.sh 4  '${CORE.PrivateIp}'
+          echo "OrganisationName=${OrganisationName}">>/var/tmp/credentials.txt
+          echo "UserName=${UserName}">>/var/tmp/credentials.txt
+          echo "MailId=${MailId}">>/var/tmp/credentials.txt
+          echo "ClusterName=${ClusterName}">>/var/tmp/credentials.txt
+          echo "Password=${Password}">>/var/tmp/credentials.txt
+          echo "licenseKey=${LicenseKey}">>/var/tmp/credentials.txt
+          echo "PrivateIp=${CORE.PrivateIp}">>/var/tmp/credentials.txt
+          echo "PublicIP=${CORE.PublicIp}">>/var/tmp/credentials.txt
+          echo "Name=${Name}">>/var/tmp/credentials.txt
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/requirements.txt
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/run.sh
+          wget https://raw.githubusercontent.com/dnif/cloudformation/FTUIAutomation/test_first_time_ui_calls.py
+          apt-get -y install python3-venv
+          sleep 60
+          bash run.sh
     Metadata:
       "AWS::CloudFormation::Designer":
         id: f1dce7ea-fd08-48c3-8bdb-b4514c05751e
-
 Outputs:
   COREPublicIp:
     Description: Server Public IP
     Value: !GetAtt CORE.PublicIp
-  COREPrivateIp:
-    Description: Server Private IP
-    Value: !GetAtt CORE.PrivateIp
-  DataNodePublicIp:
-    Description: Server Public IP
-    Value: !GetAtt DataNode.PublicIp
   AdapterPublicIp:
     Description: Server Public IP
     Value: !GetAtt Adapter.PublicIp
+  DataNodePublicIp:
+    Description: Server Public IP
+    Value: !GetAtt DataNode.PublicIp
