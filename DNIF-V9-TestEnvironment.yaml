@@ -466,7 +466,7 @@ Resources:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: ami-0012ffabeb7413479
-      InstanceType: c5.2xlarge
+      InstanceType: inf1.6xlarge
       SubnetId: !Ref VPCPrivateSubnet
       KeyName: !Ref Key
       SecurityGroupIds:
@@ -527,12 +527,12 @@ Resources:
       "AWS::CloudFormation::Designer":
         id: f1dce7ea-fd08-48c3-8bdb-b4514c05751e
 Outputs:
-  COREPublicIp:
+  CoreIp:
     Description: Server Public IP
     Value: !GetAtt CORE.PublicIp
-  AdapterPublicIp:
+  AdapterIp:
     Description: Server Public IP
     Value: !GetAtt Adapter.PublicIp
-  DataNodePublicIp:
+  DataNodeIp:
     Description: Server Public IP
     Value: !GetAtt DataNode.PublicIp
