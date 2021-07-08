@@ -379,6 +379,7 @@ services:
   environment:
    - "\'CORE_IP="$2"\'"
    - "\'PROXY="$ProxyUrl"\'"
+  tmpfs: /DNIF
   volumes:
    - /DNIF/AD:/dnif
    - /DNIF/backup/ad:/backup
@@ -717,6 +718,7 @@ services:
    - NET_ADMIN
   environment:
    - "\'CORE_IP="$2"\'"
+  tmpfs: /DNIF
   volumes:
    - /DNIF/AD:/dnif
    - /DNIF/backup/ad:/backup
